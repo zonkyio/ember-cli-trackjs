@@ -1,5 +1,5 @@
 import Ember from 'ember';
-import ErrorHandler from '../utils/error-handler';
+import ErrorHandler from '../../utils/error-handler';
 
 export function initialize(app) {
   // Guard against Ember.onerror hiding test failures

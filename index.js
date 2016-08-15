@@ -1,6 +1,8 @@
 /* jshint node: true */
 'use strict';
 
+var filterInitializers = require('fastboot-filter-initializers');
+
 module.exports = {
   name: 'ember-cli-trackjs',
 
@@ -28,10 +30,16 @@ module.exports = {
   included: function (app) {
     this._super.included(app);
 
-    var options = app.options['ember-cli-trackjs'];
+    if (!process.env.EMBER_CLI_FASTBOOT) {
+      var options = app.options['ember-cli-trackjs'];
 
-    if (!(options && options.cdn)) {
-      app.import(app.bowerDirectory + '/trackjs/tracker.js');
+      if (!(options && options.cdn)) {
+        app.import(app.bowerDirectory + '/trackjs/tracker.js');
+      }
     }
+  },
+
+  preconcatTree: function(tree) {
+    return filterInitializers(tree, this.app.name);
   }
 };
