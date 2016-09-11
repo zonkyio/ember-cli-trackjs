@@ -1,45 +1,59 @@
 /* jshint node: true */
 'use strict';
 
+var replace = require('broccoli-string-replace');
 var filterInitializers = require('fastboot-filter-initializers');
 
 module.exports = {
   name: 'ember-cli-trackjs',
 
   contentFor: function (type, config) {
-    var trackOpts;
-    var trackConfig;
-    var trackConfiguration;
-    var trackBoilerPlate;
-    var addonConfig;
+    var trackOpts = config.trackJs || {};
+    var trackConfig = trackOpts.config || {};
 
     if (type === 'head-footer') {
-      trackOpts = config.trackJs || {};
-      trackConfig = trackOpts.config || {};
+      var trackConfiguration = '';
 
-      trackConfiguration = '<script type="text/javascript" id="trackjs-configuration">window._trackJs = ' + JSON.stringify(trackConfig) + ';</script>';
-
-      if (trackOpts.url) {
-        trackBoilerPlate = '<script type="text/javascript" id="trackjs-boilerplate" src="' + trackOpts.url + '" crossorigin="anonymous"></script>';
+      if (!trackOpts.url) {
+        trackConfiguration = '<script>window._trackJs = ' + JSON.stringify(trackConfig) + ';</script>';
       }
 
-      return [trackConfiguration, trackBoilerPlate].join('\n');
+      return trackConfiguration;
     }
   },
 
-  included: function (app) {
-    this._super.included(app);
-
-    if (!process.env.EMBER_CLI_FASTBOOT) {
-      var options = app.options['ember-cli-trackjs'];
-
-      if (!(options && options.cdn)) {
-        app.import(app.bowerDirectory + '/trackjs/tracker.js');
-      }
-    }
-  },
+  // TODO app.options.trackJs is not defined
+  // included: function (app) {
+  //   this._super.included(app);
+  //
+  //   if (!process.env.EMBER_CLI_FASTBOOT) {
+  //     if (!app.options.trackJs.cdn) {
+  //       app.import(app.bowerDirectory + '/trackjs/tracker.js');
+  //     }
+  //   }
+  // },
 
   preconcatTree: function(tree) {
     return filterInitializers(tree, this.app.name);
+  },
+
+  postprocessTree(type, tree) {
+    if (!this.app.options.trackJs) {
+      return tree;
+    }
+
+    if (type === 'all') {
+      let config = this.app.options.trackJs.config;
+      let files = ['assets/trackjs-config.js'];
+
+      let pattern = {
+        match: /{{config}}/g,
+        replacement: JSON.stringify(config)
+      };
+
+      tree = replace(tree, { files, pattern });
+    }
+
+    return tree;
   }
 };
