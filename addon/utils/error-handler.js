@@ -7,7 +7,7 @@ const getStack = error => {
   let stack = error.stack;
   let message = error.message;
 
-  if (stack && !stack.includes(message)) {
+  if (stack && stack.indexOf(message) < 0) {
     stack = `${message}\n${stack}`;
   }
 
