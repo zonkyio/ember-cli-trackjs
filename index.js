@@ -2,7 +2,6 @@
 'use strict';
 
 var replace = require('broccoli-string-replace');
-var filterInitializers = require('fastboot-filter-initializers');
 
 module.exports = {
   name: 'ember-cli-trackjs',
@@ -32,10 +31,6 @@ module.exports = {
   //     }
   //   }
   // },
-
-  preconcatTree: function(tree) {
-    return filterInitializers(tree, this.app.name);
-  },
 
   postprocessTree(type, tree) {
     if (!this.app.options.trackJs) {
